@@ -83,7 +83,7 @@ A minimalist, high-performance bookmark manager built with Next.js and Supabase.
    on bookmarks for select
    using (auth.uid() = user_id);
 
-   -- Policy for deleting
+   -- Policy for deleting..
    create policy "Users can delete their own bookmarks"
    on bookmarks for delete
    using (auth.uid() = user_id);
