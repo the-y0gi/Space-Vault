@@ -106,7 +106,9 @@ export default function BookmarkList() {
             </div>
 
             <h3 className="mt-4 font-bold text-gray-900 leading-tight line-clamp-2 pr-2 text-sm sm:text-base">
-              {bookmark.title}
+              {bookmark.title
+                ?.toLowerCase()
+                .replace(/^\w/, (c) => c.toUpperCase())}
             </h3>
 
             <div className="flex items-center gap-1.5 mt-2">
