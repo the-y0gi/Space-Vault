@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Space Vault 🌌 - Smart Bookmark App
 
-## Getting Started
+A minimalist, high-performance bookmark manager built with Next.js and Supabase. Capture and organize your digital world in real-time.
 
-First, run the development server:
+## 🚀 Live Demo
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+[View Live App on Vercel](https://your-vercel-deployment-url.vercel.app) _(Replace with your live URL after deployment)_
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Google OAuth**: Fast and secure login with Google only.
+- **Personal Vault**: Each user's bookmarks are private (User A cannot see User B's).
+- **Real-time Sync**: Updates instantly across tabs using Supabase Realtime.
+- **Minimalist Design**: Clean, modern UI built with Tailwind CSS.
+- **Easy Management**: Add URLs with titles and delete them with one click.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Tech Stack
 
-## Learn More
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Database & Auth**: [Supabase](https://supabase.com/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Deployment**: [Vercel](https://vercel.com/)
 
-To learn more about Next.js, take a look at the following resources:
+## 🧠 Problems Faced & Solutions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+###  Middleware Redirection Loops
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Problem**: Setting up route protection created some redirection loops between `/login` and `/dashboard`.
+**Solution**: Refined the middleware logic to specifically check for session existence and current pathname, ensuring that `/_next` and `/auth` routes are always bypassed.
 
-## Deploy on Vercel
+## 🛠️ Setup Instructions
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **Clone the repo**:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```bash
+   git clone <your-repo-url>
+   cd smart-bookmark
+   ```
+
+2. **Install dependencies**:
+
+   ```bash
+   npm install
+   ```
+
+3. **Set up Environment Variables**:
+   Create a `.env.local` file with your Supabase credentials:
+
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. **Run the app**:
+
+   ```bash
+   npm run dev
+   ```
+
+5. **Supabase Schema**:
+   Run this in your Supabase SQL Editor:
+
+   ```sql
+   create table bookmarks (
+     id uuid default gen_random_uuid() primary key,
+     created_at timestamp with time zone default timezone('utc'::text, now()),
+     title text not null,
+     url text not null,
+     user_id uuid references auth.users(id) on delete cascade not null
+   );
+
+   -- Enable RLS
+   alter table bookmarks enable row level security;
+
+   -- Policy for inserting
+   create policy "Users can insert their own bookmarks"
+   on bookmarks for insert
+   with check (auth.uid() = user_id);
+
+   -- Policy for viewing
+   create policy "Users can view their own bookmarks"
+   on bookmarks for select
+   using (auth.uid() = user_id);
+
+   -- Policy for deleting
+   create policy "Users can delete their own bookmarks"
+   on bookmarks for delete
+   using (auth.uid() = user_id);
+   ```
